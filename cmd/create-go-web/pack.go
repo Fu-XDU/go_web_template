@@ -11,7 +11,7 @@ import (
 	"path/filepath"
 )
 
-var skipNames = map[string]struct{}{
+var skipAnywhere = map[string]struct{}{
 	".git":         {},
 	".github":      {},
 	".idea":        {},
@@ -19,11 +19,25 @@ var skipNames = map[string]struct{}{
 	".env":         {},
 	"node_modules": {},
 	"dist":         {},
-	"assets":       {},
-	"bin":          {},
-	"data":         {},
-	"cmd":          {},
-	"scripts":      {},
+}
+
+// Only skip these at the repo root so web/src/assets is kept.
+var skipRoot = map[string]struct{}{
+	"assets":  {},
+	"bin":     {},
+	"data":    {},
+	"cmd":     {},
+	"scripts": {},
+}
+
+func shouldSkip(rel, name string) bool {
+	if _, ok := skipAnywhere[name]; ok {
+		return true
+	}
+	if _, ok := skipRoot[name]; ok && filepath.Dir(rel) == "." {
+		return true
+	}
+	return false
 }
 
 func main() {
@@ -60,7 +74,7 @@ func pack(root, dest string) error {
 		if rel == "." {
 			return nil
 		}
-		if _, skip := skipNames[d.Name()]; skip {
+		if shouldSkip(rel, d.Name()) {
 			if d.IsDir() {
 				return fs.SkipDir
 			}

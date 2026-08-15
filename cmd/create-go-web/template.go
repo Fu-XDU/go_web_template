@@ -18,7 +18,7 @@ import (
 //go:embed template.zip
 var templateZip []byte
 
-var skipNames = map[string]struct{}{
+var skipAnywhere = map[string]struct{}{
 	".git":         {},
 	".github":      {},
 	".idea":        {},
@@ -26,11 +26,15 @@ var skipNames = map[string]struct{}{
 	".env":         {},
 	"node_modules": {},
 	"dist":         {},
-	"assets":       {},
-	"bin":          {},
-	"data":         {},
-	"cmd":          {},
-	"scripts":      {},
+}
+
+// Only skip these at the repo root so web/src/assets is kept.
+var skipRoot = map[string]struct{}{
+	"assets":  {},
+	"bin":     {},
+	"data":    {},
+	"cmd":     {},
+	"scripts": {},
 }
 
 func materializeTemplate(dest string) error {
@@ -164,7 +168,7 @@ func copyTemplate(src, dest string) error {
 		if rel == "." {
 			return nil
 		}
-		if shouldSkip(d.Name()) {
+		if shouldSkip(rel, d.Name()) {
 			if d.IsDir() {
 				return fs.SkipDir
 			}
@@ -190,9 +194,14 @@ func copyTemplate(src, dest string) error {
 	})
 }
 
-func shouldSkip(name string) bool {
-	_, ok := skipNames[name]
-	return ok
+func shouldSkip(rel, name string) bool {
+	if _, ok := skipAnywhere[name]; ok {
+		return true
+	}
+	if _, ok := skipRoot[name]; ok && filepath.Dir(rel) == "." {
+		return true
+	}
+	return false
 }
 
 func isInside(parent, child string) bool {

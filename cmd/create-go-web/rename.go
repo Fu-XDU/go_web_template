@@ -15,7 +15,11 @@ func renameProject(root, name string) error {
 			return err
 		}
 		if d.IsDir() {
-			if _, ok := skipNames[d.Name()]; ok {
+			rel, relErr := filepath.Rel(root, path)
+			if relErr != nil {
+				return relErr
+			}
+			if shouldSkip(rel, d.Name()) {
 				return fs.SkipDir
 			}
 			return nil
