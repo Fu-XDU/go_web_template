@@ -1,0 +1,9 @@
+services:
+  go_web_template:
+    image: go_web_template:latest
+    container_name: go_web_template
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "1423:1423"
