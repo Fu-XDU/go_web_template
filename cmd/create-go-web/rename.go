@@ -8,8 +8,10 @@ import (
 )
 
 func renameProject(root, name string) error {
-	old := []byte(templateName)
-	neu := []byte(name)
+	replacements := [][2][]byte{
+		{[]byte(publishModule), []byte(name)},
+		{[]byte(templateName), []byte(name)},
+	}
 	return filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -31,10 +33,20 @@ func renameProject(root, name string) error {
 		if err != nil {
 			return err
 		}
-		if bytes.IndexByte(data, 0) >= 0 || !bytes.Contains(data, old) {
+		if bytes.IndexByte(data, 0) >= 0 {
 			return nil
 		}
-		updated := bytes.ReplaceAll(data, old, neu)
+		updated := data
+		changed := false
+		for _, pair := range replacements {
+			if bytes.Contains(updated, pair[0]) {
+				updated = bytes.ReplaceAll(updated, pair[0], pair[1])
+				changed = true
+			}
+		}
+		if !changed {
+			return nil
+		}
 		return os.WriteFile(path, updated, 0o644)
 	})
 }

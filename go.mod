@@ -1,4 +1,4 @@
-module go_web_template
+module github.com/Fu-XDU/go_web_template
 
 go 1.25
 

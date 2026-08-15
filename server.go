@@ -2,14 +2,14 @@ package main
 
 import (
 	"fmt"
-	"go_web_template/routes"
+	"github.com/Fu-XDU/go_web_template/routes"
 	"os"
 
 	mingfuflags "github.com/Fu-XDU/mingfu_go_common/flags"
 	"github.com/labstack/gommon/log"
 	"github.com/urfave/cli/v2"
 	// MYSQL支持：1/3
-	// "go_web_template/database"
+	// "github.com/Fu-XDU/go_web_template/database"
 )
 
 const (

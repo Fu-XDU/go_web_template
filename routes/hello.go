@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"go_web_template/controller"
+	"github.com/Fu-XDU/go_web_template/controller"
 	"github.com/gin-gonic/gin"
 )
 

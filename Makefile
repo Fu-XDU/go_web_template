@@ -37,14 +37,14 @@ help:
 create:
 	@mkdir -p "$$(dirname "$(CREATE_OUT)")"
 	$(MAKE) pack-create
-	go -C cmd/create-go-web build -o "$(abspath $(CREATE_OUT))" .
+	go build -o "$(CREATE_OUT)" ./cmd/create-go-web
 	./"$(CREATE_OUT)"
 
 pack-create:
-	go -C cmd/create-go-web generate
+	go generate ./cmd/create-go-web
 
 install-create: pack-create
-	go -C cmd/create-go-web install
+	go install ./cmd/create-go-web
 # scaffold-only:end
 
 build-backend:

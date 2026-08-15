@@ -12,7 +12,7 @@ go install github.com/Fu-XDU/go_web_template/cmd/create-go-web@latest
 create-go-web
 ```
 
-请先把本仓库推到 GitHub，并保证 `cmd/create-go-web/go.mod` 里的 module 路径与仓库地址一致，然后打 tag：
+请先把本仓库推到 GitHub，并保证根目录 `go.mod` 的 module 是 `github.com/Fu-XDU/go_web_template`（与仓库地址一致），然后打 tag：
 
 ```sh
 git tag v0.0.1
@@ -156,7 +156,7 @@ MYSQL_DB=go_web_template
 
 ```go
 // 1/3  import
-"go_web_template/database"
+"github.com/Fu-XDU/go_web_template/database"
 
 // 2/3  flags
 app.Flags = append(app.Flags, mingfuflags.MysqlFlags...)
@@ -173,4 +173,4 @@ if err = database.Setup(); err != nil {
 err = db.AutoMigrate(&model.User{})
 ```
 
-并取消该文件顶部 `go_web_template/model` 的 import 注释。
+并取消该文件顶部 `github.com/Fu-XDU/go_web_template/model` 的 import 注释。

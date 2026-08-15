@@ -1,7 +1,7 @@
 package mysql
 
 import (
-	// "go_web_template/model"
+	// "github.com/Fu-XDU/go_web_template/model"
 	mingfumysql "github.com/Fu-XDU/mingfu_go_common/database/mysql"
 	"gorm.io/gorm"
 )

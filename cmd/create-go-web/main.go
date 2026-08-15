@@ -8,7 +8,10 @@ import (
 	"strings"
 )
 
-const templateName = "go_web_template"
+const (
+	templateName  = "go_web_template"
+	publishModule = "github.com/Fu-XDU/go_web_template"
+)
 
 func main() {
 	if err := run(); err != nil {

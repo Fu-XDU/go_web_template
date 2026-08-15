@@ -1,7 +1,7 @@
 package mysql
 
 import (
-	"go_web_template/model"
+	"github.com/Fu-XDU/go_web_template/model"
 )
 
 func InsertUser(user *model.User) (ID uint, err error) {
