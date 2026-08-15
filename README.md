@@ -5,18 +5,62 @@ Go + Gin 后端、Vue 3 + Vite 前端的 Web 项目模版。默认不连接 MySQ
 <!-- scaffold-only:start -->
 ## 生成新项目
 
-```sh
-make create
-```
-
-会编译 `bin/create-go-web` 并启动。直接运行也可以：
+别人安装到 `GOPATH/bin` 后，在任意目录执行 `create-go-web` 即可（会询问项目名）：
 
 ```sh
-go build -o bin/create-go-web ./cmd/create
-./bin/create-go-web
+go install github.com/Fu-XDU/go_web_template/cmd/create-go-web@latest
+create-go-web
 ```
 
-按提示输入项目名。名称必须以字母开头，只能包含字母、数字、`.`、`_`、`-`。不合法或目录已存在会重新询问。
+请先把本仓库推到 GitHub，并保证 `cmd/create-go-web/go.mod` 里的 module 路径与仓库地址一致，然后打 tag：
+
+```sh
+git tag v0.0.1
+git push origin main --tags
+```
+
+本机开发：
+
+```sh
+make create          # 打包模版、编译并启动
+make install-create  # 安装到 $(go env GOPATH)/bin
+```
+
+`GOPATH/bin` 需要在 `PATH` 里：
+
+```sh
+export PATH="$(go env GOPATH)/bin:$PATH"
+```
+
+项目名必须以字母开头，只能包含字母、数字、`.`、`_`、`-`。不合法或目录已存在会重新询问。模版已打进二进制，安装后不需要再带源码仓库。
+
+### 修改模版后如何更新
+
+`create-go-web` 用的是打包进二进制的 `cmd/create-go-web/template.zip`，只改源码不会自动生效。
+
+1. 重新打包并安装到本机：
+
+```sh
+make pack-create
+make install-create
+```
+
+`make create` 会先 pack 再编译，本机试生成时用这个即可。
+
+2. 发布给别人：把更新后的 `template.zip` 一并提交，再打**新的** tag 并推送（`@latest` 指向最新 semver tag）：
+
+```sh
+git add .
+git commit -m "update template snapshot"
+git tag v0.0.2
+git push origin main --tags
+```
+
+3. 别人更新已安装的命令：
+
+```sh
+go install github.com/Fu-XDU/go_web_template/cmd/create-go-web@latest
+```
 <!-- scaffold-only:end -->
 
 ## 环境要求

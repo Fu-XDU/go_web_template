@@ -23,13 +23,8 @@ func run() error {
 		return err
 	}
 
-	src, err := findTemplateRoot()
-	if err != nil {
-		return err
-	}
-
 	fmt.Printf("\n正在生成项目 %s ...\n", dest)
-	if err = copyTemplate(src, dest); err != nil {
+	if err = materializeTemplate(dest); err != nil {
 		_ = os.RemoveAll(dest)
 		return err
 	}

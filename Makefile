@@ -1,6 +1,6 @@
 .PHONY: help build-backend build-frontend sync-frontend build start dev test clean docker
 # scaffold-only:start
-.PHONY: create
+.PHONY: create pack-create install-create
 # scaffold-only:end
 
 SHELL := /bin/bash
@@ -29,14 +29,22 @@ help:
 	@echo "  clean             Remove build artifacts"
 	@echo "  docker            Build image $(IMG_NAME):$(VERSION) / latest / $(COMMIT)"
 # scaffold-only:start
-	@echo "  create            Build $(CREATE_OUT) and scaffold a new project"
+	@echo "  create            Pack template, build $(CREATE_OUT), then scaffold"
+	@echo "  install-create    go install create-go-web into GOPATH/bin"
 # scaffold-only:end
 
 # scaffold-only:start
 create:
 	@mkdir -p "$$(dirname "$(CREATE_OUT)")"
-	go build -o "$(CREATE_OUT)" ./cmd/create
+	$(MAKE) pack-create
+	go -C cmd/create-go-web build -o "$(abspath $(CREATE_OUT))" .
 	./"$(CREATE_OUT)"
+
+pack-create:
+	go -C cmd/create-go-web generate
+
+install-create: pack-create
+	go -C cmd/create-go-web install
 # scaffold-only:end
 
 build-backend:

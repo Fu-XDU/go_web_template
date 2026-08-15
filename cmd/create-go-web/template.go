@@ -1,6 +1,9 @@
 package main
 
 import (
+	"archive/zip"
+	"bytes"
+	_ "embed"
 	"fmt"
 	"io"
 	"io/fs"
@@ -9,6 +12,11 @@ import (
 	"runtime"
 	"strings"
 )
+
+//go:generate go run pack.go
+
+//go:embed template.zip
+var templateZip []byte
 
 var skipNames = map[string]struct{}{
 	".git":         {},
@@ -23,6 +31,64 @@ var skipNames = map[string]struct{}{
 	"data":         {},
 	"cmd":          {},
 	"scripts":      {},
+}
+
+func materializeTemplate(dest string) error {
+	if len(templateZip) > 0 {
+		return extractZip(templateZip, dest)
+	}
+	src, err := findTemplateRoot()
+	if err != nil {
+		return err
+	}
+	return copyTemplate(src, dest)
+}
+
+func extractZip(raw []byte, dest string) error {
+	r, err := zip.NewReader(bytes.NewReader(raw), int64(len(raw)))
+	if err != nil {
+		return fmt.Errorf("read embedded template: %w", err)
+	}
+	if err = os.MkdirAll(dest, 0o755); err != nil {
+		return err
+	}
+	for _, f := range r.File {
+		name := filepath.FromSlash(f.Name)
+		if name == "" || strings.Contains(name, "..") {
+			continue
+		}
+		target := filepath.Join(dest, name)
+		if !isInside(dest, target) {
+			continue
+		}
+		if f.FileInfo().IsDir() {
+			if err = os.MkdirAll(target, 0o755); err != nil {
+				return err
+			}
+			continue
+		}
+		if err = os.MkdirAll(filepath.Dir(target), 0o755); err != nil {
+			return err
+		}
+		rc, err := f.Open()
+		if err != nil {
+			return err
+		}
+		out, err := os.OpenFile(target, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, f.Mode().Perm())
+		if err != nil {
+			_ = rc.Close()
+			return err
+		}
+		_, err = io.Copy(out, rc)
+		_ = rc.Close()
+		if closeErr := out.Close(); err == nil {
+			err = closeErr
+		}
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func findTemplateRoot() (string, error) {
@@ -52,7 +118,7 @@ func findTemplateRoot() (string, error) {
 		}
 	}
 
-	return "", fmt.Errorf("cannot find template root; run inside this repo, or set GO_WEB_TEMPLATE_ROOT")
+	return "", fmt.Errorf("embedded template is missing; run go generate ./cmd/create-go-web")
 }
 
 func lookUpTemplateRoot(start string) (string, bool) {
@@ -77,7 +143,7 @@ func isTemplateRoot(dir string) bool {
 	if err != nil {
 		return false
 	}
-	return strings.Contains(string(data), "module "+templateName)
+	return strings.Contains(string(data), templateName)
 }
 
 func copyTemplate(src, dest string) error {
@@ -98,7 +164,7 @@ func copyTemplate(src, dest string) error {
 		if rel == "." {
 			return nil
 		}
-		if shouldSkip(rel, d.Name()) {
+		if shouldSkip(d.Name()) {
 			if d.IsDir() {
 				return fs.SkipDir
 			}
@@ -124,7 +190,7 @@ func copyTemplate(src, dest string) error {
 	})
 }
 
-func shouldSkip(_, name string) bool {
+func shouldSkip(name string) bool {
 	_, ok := skipNames[name]
 	return ok
 }
